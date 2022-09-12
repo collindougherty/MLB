@@ -1,0 +1,234 @@
+help(wd)
+q()
+help(wd)
+q()
+BPA3.0 = "BPA.3 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-OOB+XI-PO-OOB+(BT-SF)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP]/PA"
+BPA2.0 = "BPA.2 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-(Outs_on_bases)+SB-CS+SF+SH+ROE+BB+IBB+HBP+(Base_on_balks)-GDP]/PA"
+BPA4.0 = "BPA.4 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOB4)+XI-PO1-2*(PO2)-3*(PO3)-4*(PO4)+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CS4)+SF+SH+ROE+BB+IBB+HBP-GDP]/PA"
+BPA3.0 = "BPA.3 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-OOB+XI-PO+(BT-SF)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP]/PA"
+BPA4.0 = "BPA.4 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOB4)+XI-PO1-2*(PO2)-3*(PO3)+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CS4)+SF+SH+ROE+BB+IBB+HBP-c*(GDP)]/PA"
+getwd()
+rBPA = ".9448"
+notes = "good start, going to need more data from older seasons, also need to refine BPA equation
+#OPS is highest correlation at .9653, BPA is at .9448
+#all based only on the 2018 season and my initial equation
+#should something be subtracted for grounding into a double play?
+#good idea to think through the BPA of an individual at bat based on different plays"
+notes
+q()
+load("~/R/BPA/.RData")
+q()
+q()
+install.packages("XML")
+library(XML)
+Baserunning18 = readHTMLTable(https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml, Header=TRUE, [R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH]=NULL, trim=TRUE, which=1)
+baserunning18link = https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, [R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH]=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, c[R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH]=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, c[R/G,RS%,SBO,SB%]=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, list(R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH)=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, list(R/G,RS%,SBO,SB% ,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH)=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, list(R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH)=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, trim=TRUE, which=1, stringsasfactors=F)
+Baserunning18 = readHTMLTable("https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml", Header=TRUE, trim=TRUE, which=1, stringsAsFactors=F)
+linkbaserunning = "https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml"
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=1, stringsAsFactors=F)
+remove(linkbaserunning)
+linkbaserunning = "https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml"
+linkbaserunning = 'https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml'
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=1, stringsAsFactors=F)
+remove(linkbaserunning)
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=2, stringsAsFactors=F)
+linkbaserunning = 'https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml'
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=2, stringsAsFactors=F)
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=3, stringsAsFactors=F)
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=4, stringsAsFactors=F)
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=5, stringsAsFactors=F)
+Baserunning18 = readHTMLTable(linkbaserunning, Header=TRUE, trim=TRUE, which=8, stringsAsFactors=F)
+Baserunning18 = readHTMLTable('https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml#teams_baserunning_batting::none', Header=TRUE, list(R/G,RS%,SBO,SB%,1stS,1stS2,1stS3,1stD,1stD3,1stDH,2ndS,2ndS3,2ndSH)=NULL, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('https://www.baseball-reference.com/leagues/MLB/2018-baserunning-batting.shtml#teams_baserunning_batting::none', Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('http://bbref.com/pi/shareit/4ao2S', Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('http://bbref.com/pi/shareit/4ao2S', Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable(http://bbref.com/pi/shareit/4ao2S, Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('http://bbref.com/pi/shareit/4ao2S', Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('https://www.baseball-reference.com/pi/shareit/4ao2S', Header=TRUE, trim=TRUE, which=1)
+Baserunning18 = readHTMLTable('https://www.baseball-reference.com/pi/shareit/4ao2S', Header=TRUE, trim=TRUE)
+read.csv(https://www.baseball-reference.com/pi/shareit/4ao2S, header=T)
+read.csv('https://www.baseball-reference.com/pi/shareit/4ao2S', header=T)
+Baserunning18 = read.csv('https://www.baseball-reference.com/pi/shareit/4ao2S', header=T)
+Baserunning18 = read.delim(https://www.baseball-reference.com/pi/shareit/4ao2S', header=T)
+Baserunning18 = read.table(https://www.baseball-reference.com/pi/shareit/4ao2S', header=T)
+Baserunning18 = read.table('https://www.baseball-reference.com/pi/shareit/4ao2S', header=T)
+help(importdataset)
+help('??importdataset')
+library(readr)
+X4ao2S <- read_csv("https://www.baseball-reference.com/pi/shareit/4ao2S")
+View(X4ao2S)
+remove(X4ao2S)
+remove(Baserunning18)
+csv1 = Tm,ROE,XI,SB,CS,SB2,CS2,SB3,CS3,SBH,CSH,PO,OOB,OOB1,OOB2,OOB3,OOBHm,BT
+ARI,57,2,79,25,61,22,18,3,0,0,9,56,8,22,5,21,156
+ATL,60,0,90,36,75,28,13,7,2,1,8,51,6,14,8,23,142
+BAL,46,0,81,22,72,17,8,4,1,1,8,48,5,21,5,17,141
+BOS,70,0,125,31,109,25,16,4,0,2,12,57,5,23,12,17,186
+CHC,60,5,66,38,53,31,11,6,2,1,12,70,14,20,15,21,191
+CHW,60,1,98,41,79,37,19,3,0,1,12,53,4,18,9,22,123
+CIN,39,0,77,33,67,29,10,2,0,2,14,49,8,11,11,19,115
+CLE,56,2,135,36,118,32,15,3,2,1,7,56,11,23,11,11,187
+COL,61,0,95,33,91,33,4,0,0,0,11,59,10,12,19,18,126
+DET,68,0,70,30,66,28,4,1,0,1,13,46,9,14,12,11,150
+HOU,51,8,71,26,63,22,8,3,0,1,10,57,7,21,11,18,172
+KCR,56,0,117,38,85,31,32,5,0,2,15,50,6,14,9,21,148
+LAA,49,3,89,22,78,18,10,4,1,0,7,58,10,16,13,19,169
+LAD,57,0,75,24,57,20,18,1,0,3,10,63,9,25,10,19,196
+MIA,74,4,45,31,40,29,5,2,0,0,11,48,12,17,10,9,126
+MIL,66,3,124,32,96,25,28,7,0,0,15,56,8,16,13,19,148
+MIN,44,0,47,27,43,26,4,0,0,1,20,54,2,19,8,25,164
+NYM,60,0,71,39,60,33,11,6,0,0,12,46,8,15,10,13,141
+NYY,56,0,63,21,54,19,9,1,0,1,7,54,12,10,13,19,197
+OAK,54,0,35,21,31,20,3,1,1,0,8,42,6,10,11,15,160
+PHI,44,2,69,26,64,20,3,5,2,1,13,36,6,13,10,7,144
+PIT,52,3,70,38,64,36,6,1,0,1,6,62,11,14,14,23,147
+SDP,47,0,95,36,87,32,8,3,0,1,14,52,6,16,14,16,99
+SEA,45,4,79,37,69,34,10,2,0,1,11,40,3,10,12,15,160
+SFG,51,0,77,34,70,29,7,5,0,0,14,32,6,13,5,8,154
+STL,46,3,63,32,57,28,6,3,0,1,10,59,11,11,17,20,149
+TBR,47,1,128,51,116,44,11,4,1,3,18,64,13,18,10,23,152
+TEX,56,0,74,35,68,30,6,5,0,0,13,50,7,21,10,12,168
+TOR,56,0,47,30,38,26,7,3,2,1,8,64,7,23,13,21,141
+WSN,43,0,119,33,98,31,20,2,1,0,22,54,8,17,13,16,140
+csv1 = "Tm,ROE,XI,SB,CS,SB2,CS2,SB3,CS3,SBH,CSH,PO,OOB,OOB1,OOB2,OOB3,OOBHm,BT
+ARI,57,2,79,25,61,22,18,3,0,0,9,56,8,22,5,21,156
+ATL,60,0,90,36,75,28,13,7,2,1,8,51,6,14,8,23,142
+BAL,46,0,81,22,72,17,8,4,1,1,8,48,5,21,5,17,141
+BOS,70,0,125,31,109,25,16,4,0,2,12,57,5,23,12,17,186
+CHC,60,5,66,38,53,31,11,6,2,1,12,70,14,20,15,21,191
+CHW,60,1,98,41,79,37,19,3,0,1,12,53,4,18,9,22,123
+CIN,39,0,77,33,67,29,10,2,0,2,14,49,8,11,11,19,115
+CLE,56,2,135,36,118,32,15,3,2,1,7,56,11,23,11,11,187
+COL,61,0,95,33,91,33,4,0,0,0,11,59,10,12,19,18,126
+DET,68,0,70,30,66,28,4,1,0,1,13,46,9,14,12,11,150
+HOU,51,8,71,26,63,22,8,3,0,1,10,57,7,21,11,18,172
+KCR,56,0,117,38,85,31,32,5,0,2,15,50,6,14,9,21,148
+LAA,49,3,89,22,78,18,10,4,1,0,7,58,10,16,13,19,169
+LAD,57,0,75,24,57,20,18,1,0,3,10,63,9,25,10,19,196
+MIA,74,4,45,31,40,29,5,2,0,0,11,48,12,17,10,9,126
+MIL,66,3,124,32,96,25,28,7,0,0,15,56,8,16,13,19,148
+MIN,44,0,47,27,43,26,4,0,0,1,20,54,2,19,8,25,164
+NYM,60,0,71,39,60,33,11,6,0,0,12,46,8,15,10,13,141
+NYY,56,0,63,21,54,19,9,1,0,1,7,54,12,10,13,19,197
+OAK,54,0,35,21,31,20,3,1,1,0,8,42,6,10,11,15,160
+PHI,44,2,69,26,64,20,3,5,2,1,13,36,6,13,10,7,144
+PIT,52,3,70,38,64,36,6,1,0,1,6,62,11,14,14,23,147
+SDP,47,0,95,36,87,32,8,3,0,1,14,52,6,16,14,16,99
+SEA,45,4,79,37,69,34,10,2,0,1,11,40,3,10,12,15,160
+SFG,51,0,77,34,70,29,7,5,0,0,14,32,6,13,5,8,154
+STL,46,3,63,32,57,28,6,3,0,1,10,59,11,11,17,20,149
+TBR,47,1,128,51,116,44,11,4,1,3,18,64,13,18,10,23,152
+TEX,56,0,74,35,68,30,6,5,0,0,13,50,7,21,10,12,168
+TOR,56,0,47,30,38,26,7,3,2,1,8,64,7,23,13,21,141
+WSN,43,0,119,33,98,31,20,2,1,0,22,54,8,17,13,16,140"
+library(readr)
+csv1tbl <- read_csv("csv1")
+View(csv1tbl)
+csv1tbl <- read_csv("csv1")
+View(csv1tbl)
+remove(csv1)
+remove(linkbaserunning)
+q()
+q()
+library(readr)
+BPAbaserunning <- read_csv("~/BPAbaserunning.csv")
+View(BPAbaserunning)
+library(readr)
+standardbatting18 <- read_csv("~/standardbatting18.csv")
+View(standardbatting18)
+baserunning18 = BPAbaserunning
+view(baserunning18)
+View(baserunning18)
+remove(BPAbaserunning)
+BPA2.0
+detach(XML)
+detach(package:XML)
+attach(standardbatting18)
+attach(baserunning18)
+BPA.2 = [(1B)+2*(2B)+3*(3B)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP]/PA
+BPA.2 = ((1B)+2*(2B)+3*(3B)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+1B = (H-HR-3B-2B)
+"1B"" = (H-HR-3B-2B)
+1B = (H-HR-3B-2B)
+""
+"1B" = (H-HR-3B-2B)
+c[1B] = c[(H-HR-3B-2B)]
+1B = c[(H-HR-3B-2B)]
+standardbatting18$1B = (H-HR-3B-2B)
+standardbatting18$Singles = (H-HR-3B-2B)
+standardbatting18$"1B" = (H-HR-3B-2B)
+standardbatting18$"1B"
+standardbatting18$"1B" = H-2B-3B-HR
+standardbatting18$"1B" = "H"-"2B"-"3B"-"HR"
+H/AB
+H-2B-3B-HR
+H+2B+3B+HR
+H -2B-3B-HR
+standardbatting18[1,i]
+standardbatting18[1,]
+standardbatting18$"1B" = H-`2B`-`3B`-HR
+standardbatting18$"BPA.2" = [(1B)+2*(`2B``)+3*(`3B``)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP]/PA
+standardbatting18$"BPA.2" = ((1B)+2*(`2B``)+3*(`3B``)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+standardbatting18$"BPA.2" = ((`1B``)+2*(`2B``)+3*(`3B``)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+standardbatting18$"BPA.2" = ((`1B``)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+standardbatting18$"BPA.2" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+standardbatting18$"BPA.2" = ((1B)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+detach(standardbatting18)
+attach(standardbatting18)
+standardbatting18$"BPA.2" = ((1B)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+standardbatting18[1,]
+standardbatting18$"BPA.2" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+BPA$"BPA.2"
+BPA = standardbatting18[,1]
+View(BPA)
+BPA$"BPA.2"
+BPA$"BPA.2" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-(OOB)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+attach(BPA)
+BPA3.0
+cor(BPA.2,R)
+rBPA.2 = .9544
+rBPA = .9448
+#cant remember what initial BPA formula was but it was based entirely off of standardbatting stats and some new columns were created using them
+notes
+notes =  "good start, going to need more data from older seasons\n#OPS is highest correlation at .9653\n#should something be subtracted for grounding into a double play?\n#good idea to think through the BPA of an individual at bat based on different plays\n#cant remember what initial BPA formula was but it was based entirely off of standardbatting stats and some new columns were created using them"
+BPA3.0
+BPA$"BPA.3" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB+XI-PO+(BT-SF)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP]/PA)
+BPA$"BPA.3" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB+XI-PO+(BT-SF)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP/PA)
+BPA$"BPA.3" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB+XI-PO+(BT-SF)+SB-CS+SF+SH+ROE+BB+IBB+HBP-GDP)/PA
+cor(BPA.3,R)
+detach(BPA)
+attach(BPA)
+cor(BPA.3,R)
+rBPA.3 = .9594
+BPA4.0
+BPA$"BPA.4" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOB4)+XI-PO1-2*(PO2)-3*(PO3)+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CSH)+SF+SH+ROE+BB+IBB+HBP-(GDP))/PA
+BPA$"BPA.4" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOBHm)+XI-PO1-2*(PO2)-3*(PO3)+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CSH)+SF+SH+ROE+BB+IBB+HBP-(GDP))/PA
+BPA4.0 = "[(1B)+2*(2B)+3*(3B)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOBHm)+XI-PO+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CSH)+SF+SH+ROE+BB+IBB+HBP-(GDP)]/PA"
+BPA5.0 = "BPA.5 = [(1B)+2*(X2B)+3*(3B)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOB4)+XI-c*(PO)+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CS4)+SF+SH+ROE+BB+IBB+HBP-c*(GDP)]/PA"
+BPA4.0 = "BPA.4 = [(1B)+2*(2B)+3*(3B)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOBHm)+XI-PO+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CSH)+SF+SH+ROE+BB+IBB+HBP-(GDP)]/PA"
+BPA$"BPA.4" = ((`1B`)+2*(`2B`)+3*(`3B`)+4*(HR)-OOB1-2*(OOB2)-3*(OOB3)-4*(OOBHm)+XI-PO+(BT-SF)+SB-2*(CS2)-3*(CS3)-4*(CSH)+SF+SH+ROE+BB+IBB+HBP-(GDP))/PA
+detach(BPA)
+attach(BPA)
+cor(BPA.4,R)
+rBPA.4 = .9533
+plot(BPA.3,R)
+plot(BPA.2,R)
+plot(BPA.4,R)
+plot(BPA.3,BPA.2)
+plot(BPA.3,BPA.4)
+plot(BPA.4,BPA.2)
+plot(BPA.3,BPA.4)
+plot(BPA.3,BPA.4)
+plot(BPA.3,BPA.2)
+plot(BPA.2,R)
+notes
+#ONLY .59 AWAY FROM MATCHING OPS CORRELATION COEFFICIENT
+savehistory(file = "bpa.history1")

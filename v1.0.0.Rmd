@@ -1,0 +1,6 @@
+```{r}
+# install.packages("devtools")
+# devtools::install_github("BillPetti/baseballr")
+library(baseballr)
+library(tidyverse)
+```

@@ -1,0 +1,74 @@
+```{r}
+fb <- read.csv("savant_data.csv")
+cb <- read.csv("curveballs.csv")
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(corrr)
+library(rvest)
+```
+
+```{r}
+pitchers <- fb %>% inner_join(cb, by = 'player_id')
+fb %>% summarise(correlation = cor(velocity, launch_speed, method="pearson"))
+pitchers %>% summarise(wobas = cor(woba.x, woba.y, method='pearson'))
+```
+
+```{r}
+fb <- fb %>% mutate(adjEV = launch_speed*ï..pitches,
+             adjPV = velocity*ï..pitches)
+
+fb %>% summarise(correlation = cor(adjEV, adjPV, method="pearson"))
+
+df <- fb%>% select(ï..pitches, launch_speed, velocity)
+```
+
+```{r}
+scoringoffenseurl <- "https://baseballsavant.mlb.com/statcast_search?hfPT=FF%7C&hfAB=&hfGT=R%7C&hfPR=&hfZ=&stadium=&hfBBL=&hfNewZones=&hfPull=&hfC=&hfSea=2021%7C&hfSit=&player_type=pitcher&hfOuts=&opponent=&pitcher_throws=&batter_stands=&hfSA=&game_date_gt=&game_date_lt=&hfInfield=&team=&position=&hfOutfield=&hfRO=&home_road=&hfFlag=&hfBBT=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_pas=5&chk_stats_pa=on&chk_stats_abs=on&chk_stats_k_percent=on&chk_stats_bb=on&chk_stats_bb_percent=on&chk_stats_slg=on&chk_stats_xslg=on&chk_stats_obp=on&chk_stats_xobp=on&chk_stats_woba=on&chk_stats_velocity=on&chk_stats_launch_speed=on&chk_stats_launch_angle=on#results"
+
+scoringoffense <- scoringoffenseurl %>%
+  read_html() %>%
+  html_nodes(xpath = '//*[@id="search_results"]') %>%
+  html_table()
+
+scoringoffense <- scoringoffense[[1]]
+
+scoringoffense <- scoringoffense %>% select(OBP, SLG, 'EV (MPH)', "LA (°)", xSLG, xOBP)
+
+```
+
+```{r}
+stats <- scoringoffense %>% mutate(OPS = SLG + OBP,
+                                   xOPS =xSLG + xOBP) %>% na.omit()
+
+stats <- stats %>% rename(EV = "EV (MPH)",
+                          LA = "LA (°)")
+```
+
+```{r}
+lm_model <- linear_reg() %>%
+    set_engine("lm")
+
+fit_lm <- lm_model %>%
+  fit(OPS ~ EV + LA, data = stats)
+
+trainresults <- stats %>%
+    bind_cols(predict(fit_lm, stats))
+
+metrics(trainresults, truth = OPS, estimate = .pred)
+```
+
+```{r}
+lm_model <- linear_reg() %>%
+    set_engine("lm")
+
+fit_lm <- lm_model %>%
+  fit(xOPS ~ EV + LA, data = stats)
+
+trainresults <- stats %>%
+    bind_cols(predict(fit_lm, stats))
+
+metrics(trainresults, truth = xOPS, estimate = .pred)
+```

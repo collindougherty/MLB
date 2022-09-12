@@ -1,0 +1,363 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Modeling In Play Probability
+```{r}
+# importing libraries
+library(tidyverse)
+library(readxl)
+library(tidymodels)
+```
+
+```{r}
+# importing data
+pitches <- read.csv("Assessment_JQA_2022.csv")
+```
+
+# 1. Checking the data
+```{r}
+str(pitches)
+```
+```{r}
+# running through each categorical / factorial variable, as well as easy to check
+# quantitative variables, for any abnormalities
+unique(pitches$is_in_play)
+# no apparent issues. What's the typical percentage of pitches put in play? Is this
+# representative?
+
+unique(pitches$pitch_type)
+# all 5 pitch types represented
+
+unique(pitches$three_plus)
+# NA's, look into this further
+
+unique(pitches$batter_stance)
+# NA's, look into this further
+
+unique(pitches$pitcher_throws)
+# NA's, look into this further
+
+unique(pitches$strikes)
+# NA's, look into this further
+
+unique(pitches$balls)
+# NA's, look into this further
+
+unique(pitches$outs)
+# 0, 1, and 2 outs represented, all good here.
+
+unique(pitches$inning)
+# no data points outside of the realm of normalcy
+
+unique(pitches$top_of_inning)
+# only 1's and 0's, all good
+
+unique(pitches$pitch_per_atbat)
+# some very obviously wrong data points here, will return to look at this further
+
+unique(pitches$home_team_runs)
+# nothing out of the norm here
+
+unique(pitches$away_team_runs)
+# nothing out of the norm here either 
+
+unique(pitches$venue_city)
+# only 29 venues here
+```
+
+```{r}
+summary(pitches$pitch_plate_location_x)
+summary(pitches$pitch_plate_location_z)
+# there appear to be 15 na's
+
+summary(pitches$pitch_initial_speed)
+summary(pitches$pitch_arc_break_x)
+# nothing tremendously unusual here / 8 and 10 na's respectively
+
+summary(pitches$pitch_arc_break_z)
+# reveals at least one outlier on the negative side, 24 na's
+
+summary(pitches$pitch_spin_rate)
+# reveals some likely outliers in terms of both min and max RPM
+
+summary(pitches$pitcher_mlb_id)
+summary(pitches$batter_mlb_id)
+# no NA's, players all accounted for
+```
+
+# 2. Building the First Model: Random Forest
+```{r}
+# preparing predictors for modeling
+pitches <- pitches %>% mutate(SL = ifelse(pitch_type == "SL", 1, 0),
+                              CU = ifelse(pitch_type == "CU", 1, 0),
+                              FA = ifelse(pitch_type == "FA", 1, 0),
+                              SI = ifelse(pitch_type == "SI", 1, 0),
+                              CH = ifelse(pitch_type == "CH", 1, 0),
+                              FC = ifelse(pitch_type == "FC", 1, 0),
+                              batter_stance = ifelse(batter_stance == "R", 1, 0),
+                              pitcher_throws = ifelse(pitcher_throws == "R", 1, 0),
+                              is_in_play = as.factor(case_when(is_in_play == 1 ~ "InPlay",
+                                                               is_in_play == 0 ~ "Not")),
+                              inPlay = ifelse(is_in_play == "InPlay", 1, 0)) %>% na.omit()
+```
+
+
+```{r}
+# splitting into testing and training data to more rigorously examine the model
+set.seed(1234)
+pitches_split <- initial_split(pitches, prop = .8)
+pitches_train <- training(pitches_split)
+pitches_test <- testing(pitches_split)
+
+# creating a model recipe which we will use to train the model
+# we exclude pitch type, as it has been encoded into new variables above, and inPlay as it
+# is a duplicate of is_in_play which will only be used for model evaluation later
+# we also exclude top_of_inning and venue_city as they seem unlikely to have a substantial
+# effect
+# also excluded pitcher and batter id's, despite likely usefulness, it is probable we would
+# need significant quantities of data on each player to make a model with confidence
+model_recipe <- 
+  recipe(is_in_play ~ ., data = pitches_train) %>% 
+  update_role(pitch_type, top_of_inning, pitcher_mlb_id, batter_mlb_id, venue_city, inPlay, new_role = "ID") %>%
+  step_normalize(all_predictors())
+
+summary(model_recipe)
+```
+
+```{r}
+# defining the type of model
+rf_mod <- 
+  rand_forest() %>% 
+  set_engine("ranger") %>%
+  set_mode("classification")
+```
+
+```{r}
+# defining model workflow
+rf_workflow <- 
+  workflow() %>% 
+  add_model(rf_mod) %>% 
+  add_recipe(model_recipe)
+```
+
+```{r}
+# fitting the model
+rf_fit_inplayprob <- 
+  rf_workflow %>% 
+  fit(data = pitches_train)
+```
+
+```{r}
+# creating dataframe with predictions and actual outcome included
+rfpredict <- rf_fit_inplayprob %>% predict(new_data = pitches_train) %>%
+  bind_cols(pitches_train) 
+
+rfpredict <- rf_fit_inplayprob %>% predict(new_data = pitches_train, type="prob") %>%
+  bind_cols(rfpredict)
+```
+
+```{r}
+# assessing accuracy of model in training, predictably high, but overfitted. Will consult
+# test data metrics for better understanding of predictive power.
+metrics(rfpredict, is_in_play, .pred_class)
+```
+
+```{r}
+# applying the model to previously unseen data
+rftestpredict <- rf_fit_inplayprob %>% predict(new_data = pitches_test) %>%
+  bind_cols(pitches_test)
+
+rftestpredict <- rf_fit_inplayprob %>% predict(new_data = pitches_test, type="prob") %>%
+  bind_cols(rftestpredict)
+
+# accuracy metrics for previously unseen data. Some predictable drop-off in accuracy. Still,
+# a solid 74%.
+# the kappa is a moderate 0.41, showing that the model does a good deal better than chance,
+# given the weights of our outcome variable present in the data
+metrics(rftestpredict, is_in_play, .pred_class)
+```
+
+```{r}
+# confusion matrix, looking for any patterns of errors. The vast majority of pitches are
+# predicted to be put in play. When the model predicted pitches would not be in play, it
+# still maintains strong accuracy.
+rftestpredict %>%
+  conf_mat(is_in_play, .pred_class)
+```
+
+```{r}
+# building a continuity plot, which shows that the random forest does an excellent job of
+# approximating the probability of a ball being put in play at any given point
+rftestpredict %>%
+arrange(.pred_InPlay) %>%
+ggplot(aes(x = .pred_InPlay, y = inPlay)) +
+scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.1)) +
+scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.1)) +
+geom_smooth(aes(x = .pred_InPlay, y = inPlay), color = "red", se = F, method = "loess") + 
+geom_abline()
+```
+
+
+```{r}
+# building out a ROC-AUC plot, in case we want to fine tune the model to be better at
+# avoiding false positives or false negatives
+roc_data <- roc_curve(rftestpredict, truth = is_in_play, .pred_InPlay) 
+roc_data %>%  
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_abline(lty = 3) + 
+  coord_equal()
+```
+
+
+
+
+
+
+
+# 3. Building a Second Model: Logistic Regression
+```{r}
+# we now turn our attention to logistic regression
+# I suspect the results will not be as strong, given the data is likely non-linear
+
+# splitting data into testing and training data
+log_split <- initial_split(pitches, prop = .8)
+log_train <- training(log_split)
+log_test <- testing(log_split)
+```
+
+```{r}
+# creating a model recipe. We utilize the same variables as our random forest.
+log_recipe <- 
+  recipe(is_in_play ~ ., data = log_split) %>% 
+  update_role(pitch_type, top_of_inning, pitcher_mlb_id, batter_mlb_id, venue_city, inPlay, new_role = "ID") %>%
+  step_normalize(all_predictors())
+
+summary(log_recipe)
+```
+
+```{r}
+# setting model to logistic regression
+log_mod <- 
+  logistic_reg() %>% 
+  set_engine("glm") %>%
+  set_mode("classification")
+```
+
+```{r}
+# setting workflow
+log_workflow <- 
+  workflow() %>% 
+  add_model(log_mod) %>% 
+  add_recipe(log_recipe)
+```
+
+```{r}
+# fitting the model to the training data
+log_fit <- 
+  log_workflow %>% 
+  fit(data = log_train)
+```
+
+```{r}
+# attaching the predictions to the actual dataset
+trainpredict <- log_fit %>% predict(new_data = log_train) %>%
+  bind_cols(log_train)
+trainpredict <- log_fit %>% predict(new_data = log_train, type="prob") %>%
+  bind_cols(trainpredict)
+```
+
+
+```{r}
+# assessing the accuracy of the model on training data, will do more detailed analysis on
+# testing results
+metrics(trainpredict, is_in_play, .pred_class)
+```
+
+
+
+```{r}
+# confusion matrix
+trainpredict %>%
+  conf_mat(is_in_play, .pred_class)
+```
+
+
+```{r}
+# attaching the prediction on previously unseen testing data
+testpredict <- log_fit %>% predict(new_data = log_test) %>%
+  bind_cols(log_test)
+testpredict <- log_fit %>% predict(new_data = log_test, type="prob") %>%
+  bind_cols(testpredict)
+```
+
+
+```{r}
+# metrics for test data. We see an accuracy of 67.7%, which seems good, except for the fact
+# that the number of pitches put in play is around 65%, so we have not improved the model
+# much beyond chance guessing. This is reflected in the Kappa of only 0.235. There is some
+# predictive power, but significantly less than our random forest.
+metrics(testpredict, is_in_play, .pred_class)
+```
+
+```{r}
+# confusion matrix for the testing data
+testpredict %>%
+  conf_mat(is_in_play, .pred_class)
+```
+
+
+```{r}
+# we get a calibration plot that indicates our prediction probabilities do not model to the
+# data anywhere near as well as the random forest model 
+testpredict %>%
+arrange(.pred_InPlay) %>%
+ggplot(aes(x = .pred_InPlay, y = inPlay)) +
+scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.1)) +
+scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.1)) +
+geom_smooth(aes(x = .pred_InPlay, y = inPlay), color = "red", se = F, method = "loess") + 
+geom_abline()
+```
+
+
+```{r}
+# ROC-AUC plot, in case we want to hone the model to have better accuracy via avoiding false
+# positives or false negatives 
+roc_data <- roc_curve(testpredict, truth = is_in_play, .pred_InPlay) 
+roc_data %>%  
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_abline(lty = 3) + 
+  coord_equal()
+```
+
+
+# 4. Evalutating the Models and Next Steps
+```{r}
+# When comparing the random forest model and the logistic regression model, it is very clear
+# that the random forest is to be preferred for modeling on a new dataset. Both had solid
+# accuracy ratings, with the random forest clocking a 74% overall accuracy on previously
+# unseen data as opposed to the logistic regression's 68%. The Kappa for the random forest
+# also comes in significantly better than the logistic regression, which was not surprising 
+# to me when I chose the two models. Had the data been more clearly linear, the logistic
+# regression would have been a better comparison. The random forest really shines in its
+# handling of non-linear data, making it optimal for this task. We also see that the random
+# forest is much stronger at gauging estimated probability of any given pitch being put in
+# play than the logistic regression, as we see via the two calibration plots. 
+
+# It is worth noting that we would be unlikely to include every single variable in any
+# operational model, as some variables are likely to provide no real effect on our outcome.
+# But, for purposes of simplicity, I have omitted variable selection and included almost
+# every variable, with a few exceptions of variables that seemed highly unlikely to
+# contribute any significant predictive power. Given more time and data, I would want to
+# pursue further variable selection and testing, and we may be able to improve overall
+# accuracy with these additional steps.
+
+# Further, I wanted to pursue modeling the data via XGboost or SVM modeling, but the excess
+# computing power seemed ill-suited for the task. Given more time or computing power, these
+# methodologies would also be likely to boost our overall accuracy by a few percentage
+# points. Lastly, we would want to consider the end goal for our model and the relative cost
+# of false positives and negatives. 
+```
